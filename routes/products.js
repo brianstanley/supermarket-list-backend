@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 let Product = require("../models/Product").Product
+const { check, validationResult } = require('express-validator/check');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -9,7 +10,15 @@ router.get('/', function(req, res, next) {
   })
 });
 
-router.post('/add', (req, res, next) => {
+router.post('/add', [
+  check('name').isLength({min: 3})
+], (req, res, next) => {
+  
+  const errors = validationResult(req)
+  if(!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() })
+  }
+
   let data = new Product(req.body)
   data.save().then(item => {
     res.send("item saved to database");
